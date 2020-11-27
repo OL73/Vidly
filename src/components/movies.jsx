@@ -3,6 +3,8 @@ import { getMovies } from "./../services/fakeMovieService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import Like from "./like";
+import Pagination from "./pagination";
+import { Link } from "react-router-dom";
 
 class Movies extends Component {
   state = {
@@ -34,7 +36,9 @@ class Movies extends Component {
       return (
         <tr key={movie._id}>
           {/* <th scope="row">{movie._id}</th> */}
-          <td>{movie.title}</td>
+          <td>
+            <Link to={`/movies/${movie._id}`}>{movie.title}</Link>
+          </td>
           <td>{movie.genre.name}</td>
           <td>{movie.numberInStock}</td>
           <td>{movie.dailyRentalRate}</td>
@@ -90,6 +94,7 @@ class Movies extends Component {
           </thead>
           <tbody>{this.renderMovies()}</tbody>
         </table>
+        <Pagination />
       </>
     );
   }

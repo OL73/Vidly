@@ -1,18 +1,13 @@
 import React from "react";
+import { BrowserRouter } from "react-router-dom";
 import "./App.css";
-import Movies from "./components/movies";
-import { Route } from 'react-dom';
-import { Switch } from 'react-router-dom';
-import NavBar from "./components/navBar";
+import AppLayout from "./components/Layout/AppLayout";
 
 function App() {
   return (
-    <>
-      <NavBar />
-      <main className="container">
-        <Movies />
-      </main>
-    </>
+    <BrowserRouter>
+      <AppLayout />
+    </BrowserRouter>
   );
 }
 

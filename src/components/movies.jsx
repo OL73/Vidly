@@ -5,10 +5,13 @@ import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import Like from "./like";
 import Pagination from "./pagination";
 import { Link } from "react-router-dom";
+import { paginate } from "./Utils/paginate";
 
 class Movies extends Component {
   state = {
     movies: getMovies(),
+    itemsPerPage: 4,
+    currentPage: 1,
   };
 
   componentDidMount() {
@@ -31,8 +34,16 @@ class Movies extends Component {
     this.setState({ movies });
   };
 
+  handlePage = (page) => {
+    this.setState({ currentPage: page });
+  };
+
   renderMovies() {
-    return this.state.movies.map((movie, index) => {
+    const { movies: allMovies, itemsPerPage, currentPage } = this.state;
+
+    const movies = paginate(allMovies, currentPage, itemsPerPage);
+
+    return movies.map((movie, index) => {
       return (
         <tr key={movie._id}>
           {/* <th scope="row">{movie._id}</th> */}
@@ -74,6 +85,7 @@ class Movies extends Component {
 
   render() {
     const { length: count } = this.state.movies;
+    const { itemsPerPage, currentPage } = this.state;
 
     if (count === 0) return "There is no movies !";
 
@@ -94,7 +106,12 @@ class Movies extends Component {
           </thead>
           <tbody>{this.renderMovies()}</tbody>
         </table>
-        <Pagination />
+        <Pagination
+          moviesSize={count}
+          itemsPerPage={itemsPerPage}
+          currentPage={currentPage}
+          onHandlePage={this.handlePage}
+        />
       </>
     );
   }

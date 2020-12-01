@@ -1,6 +1,5 @@
 import React from "react";
 import _ from "lodash";
-import { Link } from "react-router-dom";
 
 const Pagination = ({
   moviesSize,
@@ -18,7 +17,7 @@ const Pagination = ({
 
   return (
     <nav
-      className="d-flex justify-content-center"
+      className="d-flex justify-content-center mt-3"
       aria-label="Page navigation example"
     >
       <ul className="pagination ">
@@ -28,7 +27,7 @@ const Pagination = ({
             className={page === currentPage ? "page-item active" : "page-item"}
             onClick={() => onHandlePage(page)}
           >
-            <a className="page-link">{page}</a>
+            <p className="page-link">{page}</p>
           </li>
         ))}
       </ul>

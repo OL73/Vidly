@@ -6,22 +6,25 @@ import Like from "./like";
 import Pagination from "./pagination";
 import { Link } from "react-router-dom";
 import { paginate } from "./Utils/paginate";
+import Genres from "./Genres";
+import { getGenres } from "../services/fakeGenreService";
 
 class Movies extends Component {
   state = {
-    movies: getMovies(),
+    movies: [],
     itemsPerPage: 4,
     currentPage: 1,
+    genres: [],
+    currentGenre: 'All genres',
   };
 
   componentDidMount() {
-    const movies = [
-      ...this.state.movies.map((movie) => {
-        movie["isLiked"] = false;
-        return movie;
-      }),
-    ];
-    this.setState({ movies });
+    const movies = getMovies().map((movie) => {
+      movie["isLiked"] = false;
+      return movie;
+    });
+
+    this.setState({ movies, genres: getGenres() })
   }
 
   handleLiked = (movie) => {
@@ -34,45 +37,12 @@ class Movies extends Component {
     this.setState({ movies });
   };
 
-  handlePage = (page) => {
-    this.setState({ currentPage: page });
-  };
-
-  renderMovies() {
-    const { movies: allMovies, itemsPerPage, currentPage } = this.state;
-
-    const movies = paginate(allMovies, currentPage, itemsPerPage);
-
-    return movies.map((movie, index) => {
-      return (
-        <tr key={movie._id}>
-          {/* <th scope="row">{movie._id}</th> */}
-          <td>
-            <Link to={`/movies/${movie._id}`}>{movie.title}</Link>
-          </td>
-          <td>{movie.genre.name}</td>
-          <td>{movie.numberInStock}</td>
-          <td>{movie.dailyRentalRate}</td>
-          <td>
-            <Like
-              isLiked={movie.isLiked}
-              onLiked={() => this.handleLiked(movie)}
-            />
-          </td>
-          <td onClick={() => this.handleDelete(movie._id)}>
-            <FontAwesomeIcon icon={faTrashAlt} className="text-danger" />
-          </td>
-        </tr>
-      );
-    });
-  }
-
-  informationMovies() {
+  informationMovies(filteredMovies) {
     //if (this.state.movies.length === 0) return "There is no movies !";
 
     return (
-      this.state.movies.length > 0 &&
-      `Showing ${this.state.movies.length} in the database.`
+      filteredMovies.length > 0 &&
+      `Showing ${filteredMovies.length} in the database.`
     );
   }
 
@@ -83,29 +53,78 @@ class Movies extends Component {
     this.setState({ movies }); // identique à this.setState({ movies: movies });
   };
 
+  handlePage = (page) => {
+    this.setState({ currentPage: page });
+  };
+
+  handleGenre = genre => {
+    this.setState({ currentGenre: genre, currentPage: 1 });
+  }
+
   render() {
-    const { length: count } = this.state.movies;
-    const { itemsPerPage, currentPage } = this.state;
+    const { movies: allMovies, itemsPerPage, currentPage, genres, currentGenre } = this.state;
+
+    const filteredMovies = currentGenre !== 'All genres' ? allMovies.filter(movies => movies.genre.name === currentGenre) : allMovies;
+
+    // utilisation de lodash dans la fonction paginate pour récupérer un nombre de movies en fonction du nombre itemPerPage
+    // et dynamique selon la page sur laquelle on se situe
+    const movies = paginate(filteredMovies, currentPage, itemsPerPage);
+
+    const count = filteredMovies.length;
 
     if (count === 0) return "There is no movies !";
 
     return (
       <>
-        <p>{this.informationMovies()}</p>
-        <table className="table">
-          <thead>
-            <tr>
-              {/* <th scope="col">#</th> */}
-              <th scope="col">Title</th>
-              <th scope="col">Genre</th>
-              <th scope="col">Stock</th>
-              <th scope="col">Rate</th>
-              <th scope="col"></th>
-              <th scope="col"></th>
-            </tr>
-          </thead>
-          <tbody>{this.renderMovies()}</tbody>
-        </table>
+        <div className='row'>
+          <Genres
+            genres={genres}
+            onGenre={this.handleGenre}
+            currentGenre={currentGenre}
+          />
+          <div className="col">
+            <div className="d-flex flex-column">
+              <p>{this.informationMovies(filteredMovies)}</p>
+              <table
+                className="table"
+              >
+                <thead className="thead-light">
+                  <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col">Genre</th>
+                    <th scope="col">Stock</th>
+                    <th scope="col">Rate</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {movies.map((movie, index) => {
+                    return (
+                      <tr key={movie._id}>
+                        <td>
+                          <Link to={`/movies/${movie._id}`}>{movie.title}</Link>
+                        </td>
+                        <td>{movie.genre.name}</td>
+                        <td>{movie.numberInStock}</td>
+                        <td>{movie.dailyRentalRate}</td>
+                        <td>
+                          <Like
+                            isLiked={movie.isLiked}
+                            onLiked={() => this.handleLiked(movie)}
+                          />
+                        </td>
+                        <td onClick={() => this.handleDelete(movie._id)}>
+                          <FontAwesomeIcon icon={faTrashAlt} className="text-danger" />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
         <Pagination
           moviesSize={count}
           itemsPerPage={itemsPerPage}

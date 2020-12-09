@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { paginate } from "./Utils/paginate";
 import Genres from "./Genres";
 import { getGenres } from "../services/fakeGenreService";
+import SearchMovie from "./SearchMovie";
 
 class Movies extends Component {
   state = {
@@ -16,6 +17,7 @@ class Movies extends Component {
     currentPage: 1,
     genres: [],
     currentGenre: 'All genres',
+    searchingMovies: []
   };
 
   componentDidMount() {
@@ -37,12 +39,12 @@ class Movies extends Component {
     this.setState({ movies });
   };
 
-  informationMovies(filteredMovies) {
+  informationMovies(count) {
     //if (this.state.movies.length === 0) return "There is no movies !";
 
     return (
-      filteredMovies.length > 0 &&
-      `Showing ${filteredMovies.length} in the database.`
+      count > 0 &&
+      `Showing ${count} in the database.`
     );
   }
 
@@ -61,16 +63,25 @@ class Movies extends Component {
     this.setState({ currentGenre: genre, currentPage: 1 });
   }
 
+  handleSearchMovie = value => {
+    const movies = [...this.state.movies];
+
+    const searchingMovies = value.length > 0 ? movies.filter(movies => movies.title.toLowerCase().includes(value)) : [];
+    console.log(searchingMovies);
+
+    this.setState({ searchingMovies });
+  }
+
   render() {
-    const { movies: allMovies, itemsPerPage, currentPage, genres, currentGenre } = this.state;
+    const { movies: allMovies, itemsPerPage, currentPage, genres, currentGenre, searchingMovies } = this.state;
 
     const filteredMovies = currentGenre !== 'All genres' ? allMovies.filter(movies => movies.genre.name === currentGenre) : allMovies;
 
     // utilisation de lodash dans la fonction paginate pour récupérer un nombre de movies en fonction du nombre itemPerPage
     // et dynamique selon la page sur laquelle on se situe
-    const movies = paginate(filteredMovies, currentPage, itemsPerPage);
+    const movies = searchingMovies.length === 0 ? paginate(filteredMovies, currentPage, itemsPerPage) : searchingMovies;
 
-    const count = filteredMovies.length;
+    const count = searchingMovies.length === 0 ? filteredMovies.length : searchingMovies.length;
 
     if (count === 0) return "There is no movies !";
 
@@ -81,10 +92,15 @@ class Movies extends Component {
             genres={genres}
             onGenre={this.handleGenre}
             currentGenre={currentGenre}
+            searchingMoviesLength={searchingMovies.length}
           />
           <div className="col">
             <div className="d-flex flex-column">
-              <p>{this.informationMovies(filteredMovies)}</p>
+              <p>{this.informationMovies(count)}</p>
+              <SearchMovie
+                handleSearchMovie={this.handleSearchMovie}
+                searchingMoviesLength={searchingMovies.length}
+              />
               <table
                 className="table"
               >
@@ -99,7 +115,7 @@ class Movies extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {movies.map((movie, index) => {
+                  {movies.map((movie) => {
                     return (
                       <tr key={movie._id}>
                         <td>

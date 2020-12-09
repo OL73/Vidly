@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Genres = ({ genres: initGenres, onGenre, currentGenre }) => {
+const Genres = ({ genres: initGenres, onGenre, currentGenre, searchingMoviesLength }) => {
 
     const genres = [{_id: '', name: 'All genres'}, ...initGenres];
 
@@ -12,7 +12,7 @@ const Genres = ({ genres: initGenres, onGenre, currentGenre }) => {
                 {genres.map(genre => 
                     (<li 
                         key={genre._id} 
-                        className={ genre.name === currentGenre ? 'list-group-item active': 'list-group-item'}
+                        className={ (genre.name === currentGenre) && (searchingMoviesLength === 0) ? 'list-group-item active': 'list-group-item'}
                         onClick={() => onGenre(genre.name)}
                     >
                         {genre.name}
